@@ -1,8 +1,8 @@
 import React from 'react';
-
+import Layout from '../components/Layout';
 const about = () => {
 	return (
-		<div>
+		<Layout>
 			<h1>About</h1>
 			<p>
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris at dictum arcu. Cras ac malesuada nisi.
@@ -12,7 +12,7 @@ const about = () => {
 				eleifend odio nisl, vel fermentum orci volutpat sed. Integer congue mauris et erat consectetur mollis.
 				Pellentesque dictum molestie fringilla.
 			</p>
-		</div>
+		</Layout>
 	);
 };
 
