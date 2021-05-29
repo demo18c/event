@@ -1,34 +1,49 @@
 import React, { useState } from 'react';
-import { parseCookies } from '@/helpers/index';
 import { useRouter } from 'next/router';
+import { parseCookies } from '@/helpers/index';
+
 import Link from 'next/link';
+import Image from 'next/image';
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 import { API_URL } from '@/config/index';
+import moment from 'moment';
 import styles from '@/styles/Form.module.css';
 import Layout from '@/components/Layout';
+import Modal from '@/components/Modal';
+import ImageUpload from '@/components/ImageUpload';
+import { FaImage } from 'react-icons/fa';
 
-export async function getServerSideProps({ req }) {
+export async function getServerSideProps({ params: { id }, req }) {
 	const { token } = parseCookies(req);
+
+	const res = await fetch(`${API_URL}/events/${id}`);
+	const evt = await res.json();
 
 	return {
 		props: {
+			evt,
 			token
 		}
 	};
 }
 
-const AddEvent = ({ token }) => {
+const EditEvent = ({ evt, token }) => {
 	const [values, setValues] = useState({
-		name: '',
-		performers: '',
-		venue: '',
-		address: '',
-		date: '',
-		time: '',
-		description: ''
+		name: evt.name,
+		performers: evt.performers,
+		venue: evt.venue,
+		address: evt.address,
+		date: evt.date,
+		time: evt.time,
+		description: evt.description
 	});
 
+	const [imagePreview, setImagePreview] = useState(evt.image ? evt.image.formats.thumbnail.url : null);
+
+	const [showModal, setShowModal] = useState(false);
 	const router = useRouter();
 
 	const handleSubmit = async e => {
@@ -41,8 +56,8 @@ const AddEvent = ({ token }) => {
 			toast.error('Please fill in all fields');
 		}
 
-		const res = await fetch(`${API_URL}/events`, {
-			method: 'POST',
+		const res = await fetch(`${API_URL}/events/${evt.id}`, {
+			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${token}`
@@ -67,10 +82,17 @@ const AddEvent = ({ token }) => {
 		setValues({ ...values, [name]: value });
 	};
 
+	const imageUploaded = async e => {
+		const res = await fetch(`${API_URL}/events/${evt.id}`);
+		const data = await res.json();
+		setImagePreview(data.image.formats.thumbnail.url);
+		setShowModal(false);
+	};
+
 	return (
-		<Layout title="Add New Event">
+		<Layout title="Edit Event">
 			<Link href="/events">Go Back</Link>
-			<h1>Add Event</h1>
+			<h1>Edit Event</h1>
 			<ToastContainer />
 
 			<form className={styles.form} onSubmit={handleSubmit}>
@@ -105,7 +127,13 @@ const AddEvent = ({ token }) => {
 					</div>
 					<div>
 						<label htmlFor="date">Date</label>
-						<input type="date" name="date" id="date" value={values.date} onChange={handleInputChange} />
+						<input
+							type="date"
+							name="date"
+							id="date"
+							value={moment(values.date).format('yyyy-MM-DD')}
+							onChange={handleInputChange}
+						/>
 					</div>
 					<div>
 						<label htmlFor="time">Time</label>
@@ -123,10 +151,29 @@ const AddEvent = ({ token }) => {
 						onChange={handleInputChange}
 					></textarea>
 				</div>
-				<input type="submit" value="Add Event" className="btn" />
+				<input type="submit" value="Update Event" className="btn" />
 			</form>
+			<h2>Event Image</h2>
+			{imagePreview ? (
+				<Image src={imagePreview} height={100} width={170} />
+			) : (
+				<div>
+					<p>No image uploaded</p>
+				</div>
+			)}
+
+			<div>
+				<button onClick={() => setShowModal(true)} className="btn-secondary btn-icon">
+					<FaImage />
+					Set Image
+				</button>
+			</div>
+
+			<Modal show={showModal} onClose={() => setShowModal(false)}>
+				<ImageUpload evtId={evt.id} imageUploaded={imageUploaded} token={token} />
+			</Modal>
 		</Layout>
 	);
 };
 
-export default AddEvent;
+export default EditEvent;

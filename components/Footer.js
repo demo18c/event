@@ -6,7 +6,7 @@ import styles from '../styles/Footer.module.css';
 const Footer = () => {
 	return (
 		<footer className={styles.footer}>
-			<p>dacac</p>
+			<p>Copy Right@</p>
 			<Link href="/about">About This</Link>
 		</footer>
 	);
