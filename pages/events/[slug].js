@@ -2,7 +2,10 @@ import React from 'react';
 import { API_URL } from '@/config/index';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Router, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
+
+import EventMap from '@/components/EventMap';
+
 import Layout from '@/components/Layout';
 import styles from '@/styles/Eve.module.css';
 
@@ -28,29 +31,29 @@ export async function getServerSideProps({ query: { slug } }) {
 const EventPage = ({ evt }) => {
 	const router = useRouter();
 
-	const deleteEvent = async e => {
-		const res = await fetch(`${API_URL}/events/${evt.id}`, {
-			method: 'DELETE'
-		});
-		const data = await res.json();
+	// const deleteEvent = async e => {
+	// 	const res = await fetch(`${API_URL}/events/${evt.id}`, {
+	// 		method: 'DELETE'
+	// 	});
+	// 	const data = await res.json();
 
-		if (!res.ok) {
-			toast.error(data.message);
-		} else {
-			router.push('/events');
-		}
-	};
+	// 	if (!res.ok) {
+	// 		toast.error(data.message);
+	// 	} else {
+	// 		router.push('/events');
+	// 	}
+	// };
 	return (
 		<Layout>
 			<div className={styles.event}>
-				<div className={styles.controls}>
+				{/* <div className={styles.controls}>
 					<Link href={`/events/edit/${evt.id}`}>
 						<a>Edit</a>
 					</Link>
 					<a href="#" onClick={deleteEvent} className={styles.delete}>
 						Delete
 					</a>
-				</div>
+				</div> */}
 				<span>
 					{evt.date} at {evt.time}
 				</span>
@@ -67,6 +70,7 @@ const EventPage = ({ evt }) => {
 				<p>{evt.description} </p>
 				<h3>Venue : {evt.venue} </h3>
 				<p>{evt.address} </p>
+				<EventMap evt={evt} />
 				<Link href="/events">
 					<a className={styles.back}>Go Back</a>
 				</Link>
